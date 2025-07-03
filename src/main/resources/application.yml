@@ -1,0 +1,53 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/${DB_NAME:db}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:name}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource # 指定使用 Druid 数据源
+    druid:
+      initial-size: 5 # 初始化时建立的连接数
+      max-active: 20 # 最大连接池数量
+      min-idle: 5 # 最小空闲连接数
+      max-wait: 60000 # 获取连接的最大等待时间（毫秒）
+      pool-prepared-statements: true # 是否启用预编译语句池
+      max-pool-prepared-statement-per-connection-size: 20 # 每个连接的最大预编译语句池大小
+      validation-query: SELECT 1 # 用于验证连接是否有效的 SQL 查询
+      test-on-borrow: false # 申请连接时是否执行 validationQuery 检测连接有效性
+      test-on-return: false # 归还连接时是否执行 validationQuery 检测连接有效性
+      test-while-idle: true # 空闲时是否执行 validationQuery 检测连接有效性
+      time-between-eviction-runs-millis: 60000 # 空闲连接回收器运行的时间间隔（毫秒）
+      min-evictable-idle-time-millis: 300000 # 连接在池中最小空闲时间（毫秒）
+      filters: stat,wall # 配置监控统计拦截器（stat）、SQL 防火墙（wall）
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      database: 0
+      password:
+      timeout: 5000
+
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 2
+          max-wait: 5000ms
+
+rocketmq:
+  name-server: ${ROCKET_MQ_SERVER}
+  consumer:
+    group: ["test-consumer-group","slug-consumer-group","summary-consumer-group"]
+
+
+logging:
+  level:
+    root: INFO
+  file:
+    path: ./.logs
+
+logback:
+  filesize: 50MB
+  filemaxday: 30
