@@ -16,7 +16,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import static com.wenziyue.llmwork.constant.RedisConstant.ARTICLE_VERSION_KEY;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static com.wenziyue.llmwork.constant.RedisConstant.ARTICLE_UPDATE_TIME_KEY;
 
 
 /**
@@ -51,7 +54,7 @@ public class SummaryMessageListener implements RocketMQListener<String> {
                 log.error("转换 summaryDTO 结果为null:{}", message);
                 return;
             }
-            if (isVersionMismatch(summaryDTO.getArticleId(), summaryDTO.getVersion())) {
+            if (isVersionMismatch(summaryDTO.getArticleId(), summaryDTO.getUpdateTime())) {
                 return;
             }
 
@@ -90,11 +93,11 @@ public class SummaryMessageListener implements RocketMQListener<String> {
             log.info("生成 summary 结果: {}", summary);
             log.info("生成 slug 结果: {}", slug);
 
-            if (isVersionMismatch(summaryDTO.getArticleId(), summaryDTO.getVersion())) {
+            if (isVersionMismatch(summaryDTO.getArticleId(), summaryDTO.getUpdateTime())) {
                 return;
             }
             // 将 summary、slug 写入DB
-            if (articleDao.updateArticleSummaryAndSlug(summaryDTO.getArticleId(), summary, slug, summaryDTO.getVersion()) == 0) {
+            if (articleDao.updateArticleSummaryAndSlug(summaryDTO.getArticleId(), summary, slug,  LocalDateTime.parse(summaryDTO.getUpdateTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))) == 0) {
                 log.error("更新文章 {} 的 summary、slug 失败", summaryDTO.getArticleId());
             }
         } catch (Exception e) {
@@ -102,7 +105,7 @@ public class SummaryMessageListener implements RocketMQListener<String> {
         } finally {
             // 删除版本号
             if (summaryDTO != null && summaryDTO.getArticleId() != null) {
-                redisUtils.delete(ARTICLE_VERSION_KEY + summaryDTO.getArticleId());
+                redisUtils.delete(ARTICLE_UPDATE_TIME_KEY + summaryDTO.getArticleId());
             }
         }
     }
@@ -126,13 +129,13 @@ public class SummaryMessageListener implements RocketMQListener<String> {
      * @return true:一致， false:不一致
      */
 //    @SuppressWarnings("BooleanMethodIsAlwaysInverted") //屏蔽inverted警告
-    private boolean isVersionMismatch(Long articleId, Integer version) {
-        val versionNow = redisUtils.get(ARTICLE_VERSION_KEY + articleId, Integer.class);
+    private boolean isVersionMismatch(Long articleId, String updateTime) {
+        val versionNow = redisUtils.get(ARTICLE_UPDATE_TIME_KEY + articleId, String.class);
         if (versionNow == null) {
             log.error("文章 {} 的版本不存在", articleId);
             return true;
         }
-        if (!versionNow.equals(version)) {
+        if (!versionNow.equals(updateTime)) {
             log.error("文章 {} 的版本不匹配", articleId);
             return true;
         }

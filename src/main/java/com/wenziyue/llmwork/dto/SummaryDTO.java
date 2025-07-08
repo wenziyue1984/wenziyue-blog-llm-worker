@@ -21,5 +21,5 @@ public class SummaryDTO implements Serializable {
 
     private Long articleId;
 
-    private Integer version;
+    private String updateTime;
 }

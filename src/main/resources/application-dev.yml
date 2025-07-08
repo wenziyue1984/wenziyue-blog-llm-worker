@@ -10,28 +10,3 @@ logging:
 rocketmq:
   name-server: ${ROCKET_MQ_SERVER_DEV}
 
-wenziyue:
-  # wenziyue-uid-starter
-  uid:
-    step: 10
-    prepare-next-percent: 70
-  # wenziyue-security-starter
-  security:
-    expire: 240 # token过期时间，测试4分钟
-    refresh-before-expiration: 120  # 刷新token时间，测试2分钟
-    white-list:
-      - "/test/**"
-      - "/captcha/**"
-      - "/auth/register"
-      - "/auth/login"
-      - "/auth/googleLogin"
-
-
-# swagger-ui 配置
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-    url: /v3/api-docs          # 明确告诉 UI 去这里拿接口定义
-

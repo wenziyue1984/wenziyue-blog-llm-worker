@@ -6,7 +6,7 @@ package com.wenziyue.llmwork.constant;
 public interface RedisConstant {
 
     /**
-     * 文章版本
+     * 文章更新时间
      */
-    String ARTICLE_VERSION_KEY = "blog:article:version:";
+    String ARTICLE_UPDATE_TIME_KEY = "blog:article:updateTime:";
 }
